@@ -30,6 +30,7 @@ Thumbs.db
 .env
 .env.*
 
-# IDE
+# IDE / editor local state
 .cursor/
 .vscode/
+settings.local.json
