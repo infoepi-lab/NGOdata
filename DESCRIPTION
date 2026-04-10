@@ -1,0 +1,46 @@
+Package: infoepi.NGOdata
+Title: NGO Data Pipeline (Form 990 XML Processing)
+Version: 0.1.0
+Authors@R: person("E. Rosalie", "Li", email = "infoepi-lab@users.noreply.github.com", role = c("aut", "cre"))
+Author: E. Rosalie Li [aut, cre]
+Maintainer: E. Rosalie Li <infoepi-lab@users.noreply.github.com>
+Description: R pipeline for NGO and nonprofit data processing: bulk index/range fetch,
+    Form 990 XML parsing (Part VII, Schedule F), and analysis/export.
+    Developed at the Information Epidemiology Lab.
+License: MIT + file LICENSE
+Encoding: UTF-8
+SystemRequirements: zlib
+Roxygen: list(markdown = TRUE)
+Depends: R (>= 4.1.0)
+Imports:
+    dplyr,
+    tidyr,
+    httr2,
+    jsonlite,
+    readr,
+    stringr,
+    tibble,
+    utils,
+    xml2
+Suggests:
+    testthat (>= 3.0.0),
+    covr,
+    openxlsx
+Collate:
+    '00_config.R'
+    '01_xpath_registry.R'
+    '02_models.R'
+    '03_xml_parse_helpers.R'
+    '04_xml_parser.R'
+    '05_parse_board_members.R'
+    '06_parse_foreign_grants.R'
+    '07_analysis_board_analysis.R'
+    '08_analysis_grants_analysis.R'
+    '09_analysis_export.R'
+    '10_acquire_ir_range_fetch.R'
+    '11_run_pipeline.R'
+    '12_read_helpers.R'
+URL: https://infoepi-lab.github.io/irs-data/, https://github.com/infoepi-lab/irs-data
+BugReports: https://github.com/infoepi-lab/irs-data/issues
+RoxygenNote: 7.3.3
+Config/testthat/edition: 3

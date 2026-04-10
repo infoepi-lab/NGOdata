@@ -1,0 +1,7 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^\.positai$
+^_pkgdown\.yml$
+^docs$
+^\.github$
+^codecov\.yml$

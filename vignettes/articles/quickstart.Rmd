@@ -1,0 +1,121 @@
+---
+title: "Getting Started with infoepi.NGOdata"
+---
+
+## Overview
+
+The `infoepi.NGOdata` package provides tools for processing IRS Form 990 nonprofit data. This article shows how to get started with the core functionality.
+
+## Installation
+
+```r
+# Install from local source (development version)
+# install.packages(".", repos = NULL, type = "source")
+
+library(infoepi.NGOdata)
+```
+
+## Quick start
+
+### 1. Set up project structure
+
+```r
+paths <- irs_project_paths()
+print(paths)
+
+irs_ensure_dirs(paths)
+```
+
+### 2. Parse a single Form 990 XML file
+
+```r
+xml_file <- "path/to/your/990.xml"
+
+ein <- peek_filing_ein(xml_file)
+print(paste("EIN:", ein))
+
+filing_data <- parse_990_xml(xml_file)
+str(filing_data, max.level = 2)
+```
+
+### 3. Analyze board members
+
+```r
+board_df <- board_members_to_tibble(filing_data$board_members)
+print(board_df)
+
+comp_summary <- compensation_summary(board_df)
+print(comp_summary)
+
+top_paid <- top_compensated(board_df, n = 5)
+print(top_paid)
+```
+
+### 4. Process foreign grants
+
+```r
+grants_df <- foreign_grants_to_tibble(filing_data$foreign_grants)
+print(grants_df)
+
+regional_grants <- grants_by_region(grants_df)
+print(regional_grants)
+
+country_grants <- grants_by_country(grants_df)
+print(country_grants)
+```
+
+### 5. Export results
+
+```r
+irs_export_csv(board_df, "board_members.csv")
+irs_export_csv(grants_df, "foreign_grants.csv")
+
+irs_export_json(filing_data, "full_filing.json")
+
+summary_data <- irs_export_filing_summary(filing_data)
+print(summary_data)
+```
+
+## Batch processing
+
+```r
+args <- list(
+  eins = c("123456789", "987654321"),
+  years_str = "2020-2022",
+  fetch = TRUE,
+  do_parse = TRUE,
+  analyze = TRUE,
+  output = "results"
+)
+
+# run_irs990_pipeline(args)
+```
+
+## Error handling
+
+```r
+safe_parse <- function(xml_path) {
+  tryCatch(
+    parse_990_xml(xml_path),
+    error = function(e) {
+      message("Failed to parse: ", xml_path)
+      message("Error: ", e$message)
+      return(NULL)
+    }
+  )
+}
+
+xml_files <- c("file1.xml", "file2.xml", "file3.xml")
+results <- lapply(xml_files, safe_parse)
+results <- results[!sapply(results, is.null)]
+```
+
+## Next steps
+
+- See the [function reference](https://infoepi-lab.github.io/irs-data/reference/) for the full API.
+- [Home](https://infoepi-lab.github.io/irs-data/) and **Get Started** on this site.
+
+## Getting help
+
+- Use `?function_name` for help on specific functions.
+- Report issues: <https://github.com/infoepi-lab/irs-data/issues>.

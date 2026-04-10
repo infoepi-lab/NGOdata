@@ -1,0 +1,113 @@
+url: https://infoepi-lab.github.io/irs-data/
+
+template:
+  bootstrap: 5
+  bootswatch: flatly
+  bslib:
+    primary: "#2c5aa0"
+    navbar-bg: "#2c5aa0"
+
+home:
+  title: infoepi.NGOdata
+  description: >
+    NGO Data Pipeline for R - Tools for fetching,
+    parsing, and analyzing nonprofit Form 990 data at scale.
+
+authors:
+  infoepi-lab:
+    href: "https://infoepi.org"
+    html: "<img src='https://infoepi.nyc3.cdn.digitaloceanspaces.com/icons/logo_mulberry_551638_no_back.png' height=20> infoepi-lab"
+
+navbar:
+  title: "infoepi.NGOdata"
+  logo:
+    src: "https://infoepi.nyc3.cdn.digitaloceanspaces.com/icons/logo_mulberry_551638_no_back.png"
+    alt: "infoepi logo"
+    href: "https://infoepi.org"
+  left:
+    - text: "Home"
+      href: index.html
+    - text: "Get Started"
+      href: articles/quickstart.html
+    - text: "Reference"
+      href: reference/
+  right:
+    - icon: fa-brands fa-github
+      href: https://github.com/infoepi-lab/irs-data
+      aria-label: GitHub
+
+footer:
+  structure:
+    left: [developed_by, built_with]
+    right: [license]
+  components:
+    license: "Licensed under [MIT](LICENSE.html)"
+    developed_by: |
+      Developed by [infoepi-lab](https://infoepi.org)
+
+reference:
+- title: "Configuration & Setup"
+  desc: "Project configuration and directory setup"
+  contents:
+  - irs_project_paths
+  - irs_ensure_dirs
+
+- title: "Data Acquisition"
+  desc: "Core functions for fetching IRS data from bulk sources"
+  contents:
+  - irs_download_index
+  - irs_search_index
+  - irs_fetch_eins_for_year
+  - irs_smart_fetch
+
+- title: "XML Processing"
+  desc: "Parse and extract data from Form 990 XML filings"
+  contents:
+  - parse_990_xml
+  - peek_filing_ein
+  - irs_xpaths_type_of_activities_conducted
+  - irs_read_schedule_f_part1_activities
+
+- title: "Board Analysis"
+  desc: "Analyze board member information and governance structures"
+  contents:
+  - board_members_to_tibble
+  - deduplicate_board_members
+  - board_tenure_analysis
+  - compensation_summary
+  - top_compensated
+  - role_distribution
+  - board_size_by_org
+  - cross_board_membership
+
+- title: "Grants Analysis"
+  desc: "Process and analyze foreign grants and international activities"
+  contents:
+  - foreign_activities_to_tibble
+  - foreign_individual_grants_to_tibble
+  - foreign_grants_to_tibble
+  - grants_by_region
+  - grants_by_country
+  - grants_by_year
+  - grants_by_ein_and_region
+  - grant_trends
+  - regional_heatmap_data
+  - top_recipients
+  - purpose_categories
+  - country_analysis
+
+- title: "Export & Pipeline"
+  desc: "Export processed data and run complete pipeline"
+  contents:
+  - irs_export_csv
+  - irs_export_json
+  - irs_export_filing_summary
+  - irs_export_full_analysis
+  - run_irs990_pipeline
+  - run_irs990_pipeline_cli
+  - parse_cli_args
+
+articles:
+- title: "Getting Started"
+  contents:
+  - articles/quickstart
