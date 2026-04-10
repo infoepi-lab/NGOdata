@@ -7,11 +7,28 @@
 board_size_by_org(df)
 }
 \arguments{
-\item{df}{Data frame containing board member data}
+\item{df}{A tibble of board members as returned by
+\code{\link[=board_members_to_tibble]{board_members_to_tibble()}}. Must contain columns \code{ein}, \code{tax_year},
+and \code{total_compensation}. If you have a path to a 990 XML file, first
+call \code{\link[=parse_990_xml]{parse_990_xml()}} on it and then pass
+\code{board_members_to_tibble(filing$board_members)} here.}
 }
 \value{
-Tibble with board size and compensation metrics by organization
+Tibble with columns \code{ein}, \code{tax_year}, \code{board_size},
+\code{total_comp}, \code{avg_comp}.
 }
 \description{
 Summarizes board size and compensation by organization and tax year.
+One row per \code{(ein, tax_year)} pair.
+}
+\examples{
+\dontrun{
+filing   <- parse_990_xml("path/to/990.xml")
+board_df <- board_members_to_tibble(filing$board_members)
+board_size_by_org(board_df)
+}
+}
+\seealso{
+\code{\link[=parse_990_xml]{parse_990_xml()}}, \code{\link[=board_members_to_tibble]{board_members_to_tibble()}},
+\code{\link[=compensation_summary]{compensation_summary()}}, \code{\link[=cross_board_membership]{cross_board_membership()}}
 }

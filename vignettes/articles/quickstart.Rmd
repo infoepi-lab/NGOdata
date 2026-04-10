@@ -40,15 +40,40 @@ str(filing_data, max.level = 2)
 
 ### 3. Analyze board members
 
+Most board-analysis helpers take a **tibble of board members**, not an XML
+path. The usual pattern is: `parse_990_xml()` → `board_members_to_tibble()`
+→ analysis function.
+
 ```r
 board_df <- board_members_to_tibble(filing_data$board_members)
 print(board_df)
 
-comp_summary <- compensation_summary(board_df)
-print(comp_summary)
+# Board size, total comp, and average comp per (ein, tax_year).
+board_size_by_org(board_df)
 
-top_paid <- top_compensated(board_df, n = 5)
-print(top_paid)
+# Compensation rollups across all rows.
+compensation_summary(board_df)
+
+# Top n highest-compensated individuals in this filing.
+top_compensated(board_df, n = 5)
+```
+
+#### Combining multiple filings
+
+For multi-year or multi-organization analysis, parse each XML file and
+row-bind the tibbles before calling an analysis function:
+
+```r
+xml_files <- list.files(paths$raw_xml_dir, pattern = "\\.xml$", full.names = TRUE)
+filings   <- lapply(xml_files, parse_990_xml)
+
+board_df <- dplyr::bind_rows(
+  lapply(filings, function(f) board_members_to_tibble(f$board_members))
+)
+
+board_size_by_org(board_df)        # one row per (ein, tax_year)
+cross_board_membership(board_df)   # individuals serving on multiple boards
+board_tenure_analysis(board_df)    # tenure distributions
 ```
 
 ### 4. Process foreign grants

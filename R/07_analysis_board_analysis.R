@@ -70,9 +70,23 @@ role_distribution <- function(df) {
 #' Calculate board size metrics by organization
 #'
 #' Summarizes board size and compensation by organization and tax year.
+#' One row per `(ein, tax_year)` pair.
 #'
-#' @param df Data frame containing board member data
-#' @return Tibble with board size and compensation metrics by organization
+#' @param df A tibble of board members as returned by
+#'   [board_members_to_tibble()]. Must contain columns `ein`, `tax_year`,
+#'   and `total_compensation`. If you have a path to a 990 XML file, first
+#'   call [parse_990_xml()] on it and then pass
+#'   `board_members_to_tibble(filing$board_members)` here.
+#' @return Tibble with columns `ein`, `tax_year`, `board_size`,
+#'   `total_comp`, `avg_comp`.
+#' @seealso [parse_990_xml()], [board_members_to_tibble()],
+#'   [compensation_summary()], [cross_board_membership()]
+#' @examples
+#' \dontrun{
+#' filing   <- parse_990_xml("path/to/990.xml")
+#' board_df <- board_members_to_tibble(filing$board_members)
+#' board_size_by_org(board_df)
+#' }
 #' @export
 board_size_by_org <- function(df) {
   if (!nrow(df)) return(tibble::tibble())
