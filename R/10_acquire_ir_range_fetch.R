@@ -316,7 +316,20 @@ irs_index_df_for_year <- function(year, paths, cache_env) {
     assign(ck, NULL, envir = cache_env)
     return(NULL)
   }
-  df <- readr::read_csv(fp, show_col_types = FALSE, progress = FALSE)
+  # Force OBJECT_ID and DLN to character: they are 18-digit integers that
+  # exceed 2^53 and lose precision when parsed as doubles, which corrupts
+  # downstream filenames and ZIP member lookups.
+  df <- readr::read_csv(
+    fp,
+    show_col_types = FALSE,
+    progress = FALSE,
+    col_types = readr::cols(
+      OBJECT_ID = readr::col_character(),
+      DLN = readr::col_character(),
+      EIN = readr::col_character(),
+      .default = readr::col_guess()
+    )
+  )
   df$ein_norm <- gsub("-", "", as.character(df$EIN), fixed = TRUE)
   assign(ck, df, envir = cache_env)
   df
