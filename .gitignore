@@ -1,0 +1,32 @@
+# R session files
+.RData
+.Rhistory
+.Rproj.user/
+.positai/
+
+# R package build artifacts
+src/*.o
+src/*.so
+src/*.dll
+src/symbols.rds
+*.Rcheck/
+
+# Large IRS index CSVs (download at runtime via irs_download_index)
+inst/extdata/index/*.csv
+inst/extdata/index/*.csv.part
+
+# Data directories (generated at runtime)
+data/
+output/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment / secrets
+.env
+.env.*
+
+# IDE
+.cursor/
+.vscode/
