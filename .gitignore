@@ -19,6 +19,9 @@ inst/extdata/index/*.csv.part
 data/
 output/
 
+# pkgdown site output (built and deployed by CI, not tracked)
+docs/
+
 # OS files
 .DS_Store
 Thumbs.db
