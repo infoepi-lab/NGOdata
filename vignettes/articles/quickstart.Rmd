@@ -112,10 +112,10 @@ results <- results[!sapply(results, is.null)]
 
 ## Next steps
 
-- See the [function reference](https://infoepi-lab.github.io/irs-data/reference/) for the full API.
-- [Home](https://infoepi-lab.github.io/irs-data/) and **Get Started** on this site.
+- See the [function reference](https://infoepi-lab.github.io/NGOdata/reference/) for the full API.
+- [Home](https://infoepi-lab.github.io/NGOdata/) and **Get Started** on this site.
 
 ## Getting help
 
 - Use `?function_name` for help on specific functions.
-- Report issues: <https://github.com/infoepi-lab/irs-data/issues>.
+- Report issues: <https://github.com/infoepi-lab/NGOdata/issues>.

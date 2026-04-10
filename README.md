@@ -1,5 +1,10 @@
-# infoepi.NGOdata
+---
+editor_options: 
+  markdown: 
+    wrap: 72
+---
 
+# infoepi.NGOdata
 
 [![License:
 MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -14,18 +19,16 @@ Python pipeline for IRS bulk index/range fetch, Form 990 XML parsing
 ### Quick Install
 
 ``` bash
-git clone https://github.com/infoepi-lab/irs-data.git
-cd irs-data/R/irs990
+git clone https://github.com/infoepi-lab/NGOdata.git
+cd NGOdata
 Rscript -e "install.packages('.', repos = NULL, type = 'source')"
 ```
 
 Or from within R (no need to change directory):
 
 ``` r
-install.packages("/path/to/irs-data/R/irs990", repos = NULL, type = "source")
+install.packages("/path/to/NGOdata", repos = NULL, type = "source")
 ```
-
-> **Note:** The R package lives in the `R/irs990` subdirectory, **not** the repo root. If you get `invalid package` or `No such file or directory`, make sure you're in the `irs-data/R/irs990` folder (the one containing `DESCRIPTION`).
 
 ### Prerequisites by Operating System
 
@@ -40,8 +43,8 @@ install.packages("/path/to/irs-data/R/irs990", repos = NULL, type = "source")
 #### Windows
 
 ``` bash
-git clone https://github.com/infoepi-lab/irs-data.git
-cd irs-data\R\irs990
+git clone https://github.com/infoepi-lab/NGOdata.git
+cd NGOdata
 Rscript -e "install.packages('.', repos = NULL, type = 'source')"
 ```
 
@@ -57,7 +60,7 @@ install immediately without loading the package, then
 
 To create a **pak lockfile** in this package
 (`pak::lockfile_create(..., lockfile = ".github/pkg.lock")`), your
-working directory must be this folder (`R/irs990`) and the `.github`
+working directory must be the repo root (`NGOdata`) and the `.github`
 directory must exist (it is included in the repository).
 
 #### macOS
@@ -66,8 +69,8 @@ directory must exist (it is included in the repository).
 # Install development tools (if needed)
 xcode-select --install
 
-git clone https://github.com/infoepi-lab/irs-data.git
-cd irs-data/R/irs990
+git clone https://github.com/infoepi-lab/NGOdata.git
+cd NGOdata
 Rscript -e "install.packages('.', repos = NULL, type = 'source')"
 ```
 
@@ -79,8 +82,8 @@ sudo apt-get update
 sudo apt-get install -y build-essential r-base-dev zlib1g-dev libxml2-dev \
   libcurl4-openssl-dev libssl-dev
 
-git clone https://github.com/infoepi-lab/irs-data.git
-cd irs-data/R/irs990
+git clone https://github.com/infoepi-lab/NGOdata.git
+cd NGOdata
 Rscript -e "install.packages('.', repos = NULL, type = 'source')"
 ```
 
@@ -91,22 +94,23 @@ Rscript -e "install.packages('.', repos = NULL, type = 'source')"
 sudo yum groupinstall "Development Tools"
 # or for Fedora: sudo dnf groupinstall "Development Tools"
 
-git clone https://github.com/infoepi-lab/irs-data.git
-cd irs-data/R/irs990
+git clone https://github.com/infoepi-lab/NGOdata.git
+cd NGOdata
 Rscript -e "install.packages('.', repos = NULL, type = 'source')"
 ```
 
 ### Alternative: Install from R Console
 
-For any platform, you can also install from within R. You can either set the working directory first, or pass the full path:
+For any platform, you can also install from within R. You can either set
+the working directory first, or pass the full path:
 
 ``` r
 # Option 1: set working directory to the package folder, then install
-setwd("/path/to/irs-data/R/irs990")
+setwd("/path/to/NGOdata")
 install.packages(".", repos = NULL, type = "source")
 
 # Option 2: pass the full path directly (no need to change directory)
-install.packages("/path/to/irs-data/R/irs990", repos = NULL, type = "source")
+install.packages("/path/to/NGOdata", repos = NULL, type = "source")
 ```
 
 ### Verify Installation
