@@ -1,4 +1,4 @@
-url: https://infoepi-lab.github.io/irs-data/
+url: https://infoepi-lab.github.io/NGOdata/
 
 template:
   bootstrap: 5
@@ -33,7 +33,7 @@ navbar:
       href: reference/
   right:
     - icon: fa-brands fa-github
-      href: https://github.com/infoepi-lab/irs-data
+      href: https://github.com/infoepi-lab/NGOdata
       aria-label: GitHub
 
 footer:
