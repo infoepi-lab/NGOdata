@@ -351,25 +351,39 @@ irs_search_index <- function(year, eins, paths = irs_project_paths(), cache_env 
   lapply(seq_len(nrow(sub)), function(i) as.list(sub[i, , drop = FALSE]))
 }
 
+irs_head_ok <- function(url, timeout = 10) {
+  tryCatch(
+    {
+      r <- httr2::request(url) |>
+        httr2::req_method("HEAD") |>
+        httr2::req_options(timeout = timeout)
+      httr2::resp_status(httr2::req_perform(r)) == 200L
+    },
+    error = function(e) FALSE
+  )
+}
+
+# Returns a character vector of fully-qualified ZIP URLs for `year`.
+# The IRS publishes 990 XML bulk data under two different URL schemes:
+#   2017-2020: download990xml_{year}_{n}.zip   (n = 1..~8)
+#   2021+    : {year}_TEOS_XML_{segment}.zip   (e.g. 01A, 01B, ..., 12D)
+# We probe both so callers don't need to know which scheme applies.
 irs_discover_segments <- function(year) {
-  segs <- character()
+  urls <- character()
+  # Legacy numbered-zip scheme (2017-2020)
+  for (n in 1:12) {
+    url <- sprintf("%s/%d/download990xml_%d_%d.zip", IRS_XML_BASE, year, year, n)
+    if (irs_head_ok(url)) urls <- c(urls, url)
+  }
+  # Modern TEOS segment scheme (2021+)
   for (num in 1:12) {
     for (letter in c("A", "B", "C", "D")) {
       seg <- sprintf("%02d%s", num, letter)
       url <- sprintf("%s/%d/%d_TEOS_XML_%s.zip", IRS_XML_BASE, year, year, seg)
-      st <- tryCatch(
-        {
-          r <- httr2::request(url) |>
-            httr2::req_method("HEAD") |>
-            httr2::req_options(timeout = 10)
-          httr2::resp_status(httr2::req_perform(r))
-        },
-        error = function(e) 0L
-      )
-      if (st == 200L) segs <- c(segs, seg)
+      if (irs_head_ok(url)) urls <- c(urls, url)
     }
   }
-  unique(segs)
+  unique(urls)
 }
 
 #' Fetch XML files for EINs for one index year (Range into TEOS ZIPs)
@@ -462,9 +476,8 @@ irs_fetch_eins_for_year <- function(
 
   unk <- intersect(unknown, still_needed)
   if (length(unk)) {
-    for (seg in irs_discover_segments(year)) {
+    for (zip_url in irs_discover_segments(year)) {
       if (!length(still_needed)) break
-      zip_url <- sprintf("%s/%d/%d_TEOS_XML_%s.zip", IRS_XML_BASE, year, year, seg)
       res <- tryCatch(
         zip_fetch_named_members(zip_url, still_needed),
         error = function(e) list()

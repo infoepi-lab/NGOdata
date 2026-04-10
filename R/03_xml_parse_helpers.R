@@ -136,13 +136,11 @@ infoepi_NGOdata_inflate_raw <- function(raw_vec, out_capacity) {
     stop("out_capacity must be a positive numeric value", call. = FALSE)
   }
 
+  # Call the registered native symbol directly. `R_forceSymbols(dll, TRUE)` in
+  # src/irs990_init.c disables lookup by string name, so we reference the
+  # symbol object exposed by `useDynLib(.registration = TRUE)` in NAMESPACE.
   tryCatch(
-    .Call(
-      "C_infoepi_NGOdata_inflate_raw",
-      raw_vec,
-      as.double(out_capacity),
-      PACKAGE = "infoepi.NGOdata"
-    ),
+    .Call(C_infoepi_NGOdata_inflate_raw, raw_vec, as.double(out_capacity)),
     error = function(e) {
       stop("Decompression failed: ", e$message, call. = FALSE)
     }
