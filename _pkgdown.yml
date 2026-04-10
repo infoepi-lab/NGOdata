@@ -103,6 +103,7 @@ reference:
   - irs_export_json
   - irs_export_filing_summary
   - irs_export_full_analysis
+  - irs_pull_all_years
   - run_irs990_pipeline
   - run_irs990_pipeline_cli
   - parse_cli_args

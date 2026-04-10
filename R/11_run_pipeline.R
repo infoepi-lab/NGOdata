@@ -238,3 +238,143 @@ run_irs990_pipeline_cli <- function(argv = commandArgs(trailingOnly = TRUE)) {
   a <- parse_cli_args(argv)
   do.call(run_irs990_pipeline, a)
 }
+
+#' One-call complete data pull across all years with timestamped report
+#'
+#' Convenience wrapper around [run_irs990_pipeline()] that fetches, parses,
+#' and analyzes filings for the requested EINs across the full default year
+#' range, then writes a Markdown summary report into the output directory.
+#' The report filename embeds the run start time so repeated pulls do not
+#' overwrite each other.
+#'
+#' @param eins Character vector of 9-digit EINs (no dashes required).
+#' @param ein_file Optional path to a text file (one EIN per line, `#` comments ok).
+#' @param years Integer vector of tax years (default `2017:2025`).
+#' @param output_dir Optional override for the output directory. Defaults to
+#'   `paths$output_dir` from [irs_project_paths()].
+#' @param project_root Repo root for [irs_project_paths()].
+#' @return Invisibly returns a list with `result` (the [run_irs990_pipeline()]
+#'   return value) and `report_path` (absolute path to the timestamped report).
+#' @examples
+#' \dontrun{
+#' # Pull every available year for two organizations and write a report
+#' irs_pull_all_years(eins = c("237404756", "131923701"))
+#'
+#' # Pull from a file of EINs into a custom output directory
+#' irs_pull_all_years(ein_file = "eins.txt", output_dir = "output/run-2026")
+#' }
+#' @export
+irs_pull_all_years <- function(
+    eins = character(),
+    ein_file = NULL,
+    years = 2017:2025,
+    output_dir = NULL,
+    project_root = NULL
+) {
+  start_time <- Sys.time()
+  ts <- format(start_time, "%Y%m%d_%H%M%S")
+
+  result <- run_irs990_pipeline(
+    eins = eins,
+    ein_file = ein_file,
+    years = years,
+    full = TRUE,
+    output_dir = output_dir,
+    project_root = project_root
+  )
+  end_time <- Sys.time()
+
+  out_dir <- result$paths$output_dir
+  dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+
+  report_path <- file.path(out_dir, sprintf("pull_report_%s.md", ts))
+
+  filings <- result$filings %||% list()
+  n_filings <- length(filings)
+
+  ein_chr <- if (n_filings) {
+    vapply(filings, function(f) as.character(f$ein %||% NA_character_), character(1L))
+  } else character()
+  n_orgs <- length(unique(stats::na.omit(ein_chr)))
+
+  total_board <- if (n_filings) {
+    sum(vapply(filings, function(f) length(f$board_members), integer(1L)))
+  } else 0L
+  total_grants <- if (n_filings) {
+    sum(vapply(filings, function(f) length(f$foreign_grants), integer(1L)))
+  } else 0L
+  total_activities <- if (n_filings) {
+    sum(vapply(filings, function(f) length(f$foreign_activities), integer(1L)))
+  } else 0L
+  total_indiv <- if (n_filings) {
+    sum(vapply(filings, function(f) length(f$foreign_individual_grants), integer(1L)))
+  } else 0L
+
+  # Count EINs requested (from list + file)
+  file_eins <- if (!is.null(ein_file) && nzchar(ein_file) && file.exists(ein_file)) {
+    ln <- readLines(ein_file, warn = FALSE)
+    ln <- sub("#.*$", "", ln)
+    ln <- gsub("-", "", trimws(ln), fixed = TRUE)
+    ln[nzchar(ln) & grepl("^[0-9]+$", ln)]
+  } else character()
+  requested <- length(unique(c(eins, file_eins)))
+
+  duration <- difftime(end_time, start_time, units = "secs")
+
+  exported <- list.files(out_dir, full.names = FALSE)
+  exported <- setdiff(exported, basename(report_path))
+  exported <- sort(exported)
+
+  lines <- c(
+    "# IRS 990 Data Pull Report",
+    "",
+    sprintf("- **Generated:** %s", format(start_time, "%Y-%m-%d %H:%M:%S %Z")),
+    sprintf("- **Duration:** %.1f seconds", as.numeric(duration)),
+    sprintf("- **Year range:** %d\u2013%d (%d years)", min(years), max(years), length(years)),
+    sprintf("- **EINs requested:** %d", requested),
+    sprintf("- **Output directory:** `%s`", out_dir),
+    "",
+    "## Coverage",
+    "",
+    sprintf("- Filings parsed: **%d**", n_filings),
+    sprintf("- Unique organizations: **%d**", n_orgs),
+    sprintf("- Board member rows: **%d**", total_board),
+    sprintf("- Foreign grant rows: **%d**", total_grants),
+    sprintf("- Foreign activity rows: **%d**", total_activities),
+    sprintf("- Individual grant rows: **%d**", total_indiv),
+    ""
+  )
+
+  if (n_filings) {
+    yrs <- vapply(filings, function(f) {
+      ty <- f$tax_year %||% NA
+      suppressWarnings(as.integer(ty))
+    }, integer(1L))
+    yrs <- yrs[!is.na(yrs)]
+    if (length(yrs)) {
+      tab <- table(yrs)
+      lines <- c(
+        lines,
+        "## Filings by tax year",
+        "",
+        "| Tax year | Filings |",
+        "|---:|---:|",
+        sprintf("| %s | %d |", names(tab), as.integer(tab)),
+        ""
+      )
+    }
+  }
+
+  lines <- c(lines, "## Files in output directory", "")
+  if (length(exported)) {
+    lines <- c(lines, paste0("- `", exported, "`"))
+  } else {
+    lines <- c(lines, "_(no files exported)_")
+  }
+  lines <- c(lines, "")
+
+  writeLines(lines, report_path)
+  message(sprintf("\nReport written: %s", report_path))
+
+  invisible(list(result = result, report_path = report_path))
+}
