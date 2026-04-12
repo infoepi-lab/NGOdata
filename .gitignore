@@ -15,6 +15,11 @@ src/symbols.rds
 inst/extdata/index/*.csv
 inst/extdata/index/*.csv.part
 
+# User analysis scripts (may contain real EINs or entity names)
+analysis_*.R
+eins.txt
+eins*.txt
+
 # Data directories (generated at runtime)
 data/
 output/

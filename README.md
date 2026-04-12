@@ -1,135 +1,138 @@
-
-
 # infoepi.NGOdata
 
-[![License:
-MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![R-CMD-check](https://github.com/infoepi-lab/NGOdata/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/infoepi-lab/NGOdata/actions/workflows/R-CMD-check.yaml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![R](https://img.shields.io/badge/R-%3E%3D4.1.0-blue.svg)](https://r-project.org)
 
-IRS Form 990 XML Pipeline (R Port) - R replication of the irs-data
-Python pipeline for IRS bulk index/range fetch, Form 990 XML parsing
-(Part VII, Schedule F), and analysis/export.
+R package for processing IRS Form 990 XML filings. Fetches bulk data from
+the IRS, parses board member rosters (Part VII) and foreign grants/activities
+(Schedule F), and exports structured datasets for analysis.
+
+## Privacy notice
+
+This package processes **public** IRS Form 990 data. It does **not** ship
+any organization-specific data, EINs, or entity names. Users supply their
+own EIN lists at runtime. Do not commit files that contain real EINs or
+organization names to this repository.
 
 ## Installation
 
-### Quick Install
-
-``` bash
+```bash
 git clone https://github.com/infoepi-lab/NGOdata.git
 cd NGOdata
 Rscript -e "install.packages('.', repos = NULL, type = 'source')"
 ```
 
-Or from within R (no need to change directory):
+Or from within R:
 
-``` r
+```r
 install.packages("/path/to/NGOdata", repos = NULL, type = "source")
 ```
 
-### Prerequisites by Operating System
+### Prerequisites
 
-| OS          | Requirements                            | Notes                 |
-|------------------|----------------------------------|--------------------|
-| **Windows** | R (\>= 4.1.0), Rtools                   | Uses `gcc` compiler   |
-| **macOS**   | R (\>= 4.1.0), Xcode Command Line Tools | Uses `clang` compiler |
-| **Linux**   | R (\>= 4.1.0), build-essential          | Uses `gcc` compiler   |
+| OS          | Requirements                             |
+|-------------|------------------------------------------|
+| **Windows** | R (>= 4.1.0), Rtools                    |
+| **macOS**   | R (>= 4.1.0), Xcode Command Line Tools  |
+| **Linux**   | R (>= 4.1.0), build-essential, zlib1g-dev, libxml2-dev, libcurl4-openssl-dev, libssl-dev |
 
-### Platform-Specific Setup
+### Verify installation
 
-#### Windows
-
-``` bash
-git clone https://github.com/infoepi-lab/NGOdata.git
-cd NGOdata
-Rscript -e "install.packages('.', repos = NULL, type = 'source')"
-```
-
-On Windows, **do not** call `library(infoepi.NGOdata)` or
-`devtools::load_all()` in the same session before reinstalling: the
-loaded `infoepi.NGOdata.dll` cannot be overwritten, which produces
-`Permission denied` and `cannot remove earlier installation`. **Restart
-R** (fully quit the app if you use RStudio), open a **new** session,
-install immediately without loading the package, then
-`library(infoepi.NGOdata)`. If a failed install left
-`00LOCK-infoepi.NGOdata` under your library folder
-(`Sys.getenv("R_LIBS_USER")`), delete that folder while R is closed.
-
-To create a **pak lockfile** in this package
-(`pak::lockfile_create(..., lockfile = ".github/pkg.lock")`), your
-working directory must be the repo root (`NGOdata`) and the `.github`
-directory must exist (it is included in the repository).
-
-#### macOS
-
-``` bash
-# Install development tools (if needed)
-xcode-select --install
-
-git clone https://github.com/infoepi-lab/NGOdata.git
-cd NGOdata
-Rscript -e "install.packages('.', repos = NULL, type = 'source')"
-```
-
-#### Linux (Ubuntu/Debian)
-
-``` bash
-# Install development tools and libraries for compiled dependencies (xml2, httr2, zlib)
-sudo apt-get update
-sudo apt-get install -y build-essential r-base-dev zlib1g-dev libxml2-dev \
-  libcurl4-openssl-dev libssl-dev
-
-git clone https://github.com/infoepi-lab/NGOdata.git
-cd NGOdata
-Rscript -e "install.packages('.', repos = NULL, type = 'source')"
-```
-
-#### Linux (CentOS/RHEL/Fedora)
-
-``` bash
-# Install development tools (if needed)
-sudo yum groupinstall "Development Tools"
-# or for Fedora: sudo dnf groupinstall "Development Tools"
-
-git clone https://github.com/infoepi-lab/NGOdata.git
-cd NGOdata
-Rscript -e "install.packages('.', repos = NULL, type = 'source')"
-```
-
-### Alternative: Install from R Console
-
-For any platform, you can also install from within R. You can either set
-the working directory first, or pass the full path:
-
-``` r
-# Option 1: set working directory to the package folder, then install
-setwd("/path/to/NGOdata")
-install.packages(".", repos = NULL, type = "source")
-
-# Option 2: pass the full path directly (no need to change directory)
-install.packages("/path/to/NGOdata", repos = NULL, type = "source")
-```
-
-### Verify Installation
-
-After installation on any platform:
-
-``` r
+```r
 library(infoepi.NGOdata)
 ```
 
-## Features
+## Quick start
 
--   **Data Acquisition**: Fetch IRS bulk data indexes and ranges
--   **XML Parsing**: Parse Form 990 XML files (Part VII, Schedule F)
--   **Board Analysis**: Analyze board member information
--   **Grants Analysis**: Analyze foreign grants data
--   **Export Tools**: Export processed data to various formats
+### 1. Set up project paths
+
+```r
+library(infoepi.NGOdata)
+
+paths <- irs_project_paths()
+irs_ensure_dirs(paths)
+```
+
+### 2. Run the full pipeline
+
+Create a plain-text file with one EIN per line (comments with `#` are ok):
+
+```
+# eins.txt
+123456789
+987654321
+```
+
+Then run:
+
+```r
+run_irs990_pipeline(
+  ein_file = "eins.txt",
+  years    = 2020:2024,
+  full     = TRUE
+)
+```
+
+Or from the command line:
+
+```bash
+Rscript exec/run_pipeline_cli.R --file eins.txt --years 2020-2024 --full
+```
+
+### 3. Use individual steps
+
+```r
+# Parse a single XML file
+filing <- parse_990_xml("path/to/990.xml")
+
+# Convert to tibbles
+board_df  <- board_members_to_tibble(filing$board_members)
+grants_df <- foreign_grants_to_tibble(filing$foreign_grants)
+
+# Analyze
+compensation_summary(board_df)
+grants_by_region(grants_df)
+
+# Export
+irs_export_csv(board_df, "board_members.csv", paths$output_dir)
+```
+
+## Pipeline steps
+
+| Step | Function | Description |
+|------|----------|-------------|
+| **Fetch** | `irs_smart_fetch()` | Downloads IRS index CSVs, looks up EINs, fetches XML filings |
+| **Parse** | `parse_990_xml()` | Extracts board members, foreign grants, activities from XML |
+| **Analyze** | `board_members_to_tibble()`, `grants_by_region()`, etc. | Converts to tibbles, deduplicates, summarizes |
+| **Export** | `irs_export_csv()`, `irs_export_json()` | Writes CSV/JSON to output directory |
+
+## Key functions
+
+- `run_irs990_pipeline()` -- end-to-end orchestrator
+- `parse_990_xml()` -- parse a single 990 XML file
+- `board_members_to_tibble()` / `foreign_grants_to_tibble()` -- structured tibbles
+- `deduplicate_board_members()` -- cross-filing deduplication
+- `grants_by_region()` / `grants_by_country()` -- geographic summaries
+- `compensation_summary()` / `top_compensated()` -- compensation analysis
+- `irs_export_csv()` / `irs_export_json()` -- file export
+
+## Output files
+
+When the pipeline completes, the output directory contains:
+
+| File | Contents |
+|------|----------|
+| `filing_summaries.csv` | One row per filing (EIN, tax year, revenue, etc.) |
+| `board_members.csv` | All board member records |
+| `board_members_deduped.csv` | Deduplicated board members |
+| `foreign_grants.csv` | Schedule F foreign grants |
+| `foreign_activities.csv` | Schedule F Part I activities |
+| `foreign_individual_grants.csv` | Individual foreign grants |
 
 ## Dependencies
 
--   R (\>= 4.1.0)
--   dplyr, tidyr, httr2, jsonlite, readr, stringr, tibble, utils, xml2,
-    openxlsx
+dplyr, tidyr, httr2, jsonlite, readr, stringr, tibble, xml2, openxlsx (suggested)
 
 ## License
 
